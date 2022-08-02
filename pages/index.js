@@ -39,10 +39,12 @@ class EthRPC {
   }
 
   getStorageAt(target, start, num, atBlock) {
+    start = parseInt(start.replace("0x",""), 16)
+
     atBlock = atBlock || "latest";
     start = start || 0;
     num = num || 1;
-    let params = [...Array(num).keys()].map((idx) => [target, (start + idx).toString(), atBlock])
+    let params = [...Array(num).keys()].map((idx) => [target, (start + idx).toString(16), atBlock])
     return this.callBatch("eth_getStorageAt", params);
   }
 
@@ -54,7 +56,7 @@ class HexViewWithForm extends React.Component {
     super(props);
     this.state = {
       endpoint: "https://ropsten.infura.io/v3/fd9e225bc1234f49b48b295c611078eb",
-      startslot: 0,
+      startslot: "0x0",
       numslots: 10,
       target: "0x3a6CAE3af284C82934174F693151842Bc71b02b2",
       atBlock: "latest",
@@ -157,7 +159,7 @@ class HexViewWithForm extends React.Component {
                       size={15}
                       pattern="[0-9]+" title="Field must be a Number."
                       value={this.state.startslot}
-                      onChange={(e) => this.setState({ startslot: !isNaN(parseInt(e.target.value.trim())) ? parseInt(e.target.value.trim()) : 0, dirty: true })}
+                      onChange={(e) => this.setState({ startslot: e.target.value.trim(), dirty: true })}
                     />
                   </td>
                   <td>
@@ -165,7 +167,7 @@ class HexViewWithForm extends React.Component {
                       size={15}
                       pattern="[0-9]+" title="Field must be a Number."
                       value={this.state.numslots}
-                      onChange={(e) => this.setState({ numslots: !isNaN(parseInt(e.target.value.trim())) ? parseInt(e.target.value.trim()) : 0, dirty: true })}
+                      onChange={(e) => this.setState({ numslots: parseInt(e.target.value.trim()), dirty: true })}
                     />
                   </td>
                   <td>
