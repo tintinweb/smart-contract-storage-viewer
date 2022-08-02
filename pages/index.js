@@ -2,9 +2,9 @@ import Head from 'next/head'
 import styles from '../styles/Home.module.css'
 import HexEditor from 'react-hex-editor';
 import React from 'react';
-import EthRPC from './apiclient';
+import EthRPC from '../lib/apiclient';
 
-import analyzeStorage from './decoder';
+import analyzeStorage from '../lib/decoder';
 
 class HexViewWithForm extends React.Component {
   constructor(props) {
