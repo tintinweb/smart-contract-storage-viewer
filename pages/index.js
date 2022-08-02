@@ -2,60 +2,15 @@ import Head from 'next/head'
 import styles from '../styles/Home.module.css'
 import HexEditor from 'react-hex-editor';
 import React from 'react';
-import $ from 'jquery';
+import EthRPC from './apiclient';
 
-
-class EthRPC {
-
-  constructor(endpoint) {
-    this.id = 0;
-    this.endpoint = endpoint;
-  }
-
-  setEndpoint(endpoint) {
-    this.endpoint = endpoint;
-  }
-
-  call(method, params) {
-    const that = this;
-    return new Promise(function (resolve, reject) {
-
-      $.ajax({
-        url: that.endpoint,
-
-        data: JSON.stringify({ jsonrpc: '2.0', method: method, params: params, id: that.id++ }),  // id is needed !!
-
-        type: "POST",
-
-        dataType: "json",
-        success: function (data) { resolve(data.result); },
-        error: function (err) { reject(err) }
-      });
-    });
-  }
-
-  callBatch(method, paramsBatch) {
-    return Promise.all(paramsBatch.map(p => this.call(method, p)));
-  }
-
-  getStorageAt(target, start, num, atBlock) {
-    start = parseInt(start.replace("0x", ""), 16)
-
-    atBlock = atBlock || "latest";
-    start = start || 0;
-    num = num || 1;
-    let params = [...Array(num).keys()].map((idx) => [target, (start + idx).toString(16), atBlock])
-    return this.callBatch("eth_getStorageAt", params);
-  }
-
-}
-
+import analyzeStorage from './decoder';
 
 class HexViewWithForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      endpoint: "https://ropsten.infura.io/v3/fd9e225bc1234f49b48b295c611078eb",
+      endpoint: "https://ropsten.infura.io/v3/4f846e79e13f44d1b51bbd7ed9edefb8",
       startslot: "0x0",
       numslots: 10,
       target: "0x3a6CAE3af284C82934174F693151842Bc71b02b2",
@@ -116,7 +71,7 @@ class HexViewWithForm extends React.Component {
       }).catch(err => {
 
         let errMsg = err.responseJSON.error.message;
-        if(errMsg.substr("rate limited")){
+        if (errMsg.substr("rate limited")) {
           errMsg += ". Check infura API-key."
         }
 
@@ -126,6 +81,8 @@ class HexViewWithForm extends React.Component {
   }
 
   render() {
+
+    console.log(analyzeStorage(this.state.data));
 
     function handleSetValue(offset, value) {
       //this.setState({data[offset] = value;
