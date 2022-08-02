@@ -17,6 +17,10 @@ a {
   box-sizing: border-box;
 }
 
+.errorBox {
+  background-color: #ffdddd83;
+}
+
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;

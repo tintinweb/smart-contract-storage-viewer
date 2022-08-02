@@ -39,7 +39,7 @@ class EthRPC {
   }
 
   getStorageAt(target, start, num, atBlock) {
-    start = parseInt(start.replace("0x",""), 16)
+    start = parseInt(start.replace("0x", ""), 16)
 
     atBlock = atBlock || "latest";
     start = start || 0;
@@ -63,6 +63,7 @@ class HexViewWithForm extends React.Component {
       data: new Array(),
       nonce: 0,
       dirty: true,
+      error: undefined,
       api: new EthRPC()
     };
   }
@@ -110,7 +111,16 @@ class HexViewWithForm extends React.Component {
         this.setState({
           data: flatData,
           nonce: this.state.nonce + 1, //force render
+          error: undefined
         });
+      }).catch(err => {
+
+        let errMsg = err.responseJSON.error.message;
+        if(errMsg.substr("rate limited")){
+          errMsg += ". Check infura API-key."
+        }
+
+        this.setState({ error: errMsg })
       });
     }
   }
@@ -182,18 +192,18 @@ class HexViewWithForm extends React.Component {
                   </td>
                   <td>
                     <div title="Get Api Key">
-                    <input
-                      type="text"
-                      name="endpoint"
-                      pattern="https?://.*" title="Field must be a HTTP(s)-URL."
-                      size={70}
-                      value={this.state.endpoint}
-                      onChange={(e) => e.target.value.trim() && this.setState({ endpoint: e.target.value.trim(), dirty: true })}
-                    />
-                    &nbsp;
-                    <a href="https://infura.io/register">ⓘ</a>
+                      <input
+                        type="text"
+                        name="endpoint"
+                        pattern="https?://.*" title="Field must be a HTTP(s)-URL."
+                        size={70}
+                        value={this.state.endpoint}
+                        onChange={(e) => e.target.value.trim() && this.setState({ endpoint: e.target.value.trim(), dirty: true })}
+                      />
+                      &nbsp;
+                      <a href="https://infura.io/register">ⓘ</a>
                     </div>
-                    
+
                   </td>
                   <td>
                   </td>
@@ -206,6 +216,9 @@ class HexViewWithForm extends React.Component {
           <div>
             <a href={`https://${chainPrefix != 'mainnet' ? `${chainPrefix}.` : ''}etherscan.io/address/${this.state.target}`}>🌐 Etherscan</a>
             {/*   &nbsp;<a href={`https://dashboard.tenderly.co/contract/${chainPrefix}/${this.state.target}`}>🟣 Tenderly</a> */}
+          </div>
+          <div className='errorBox'>
+            {this.state.error ? `❗ ${this.state.error}` : ""}
           </div>
           <HexEditor
             className="hexview"
@@ -240,7 +253,7 @@ export default function Home() {
       </Head>
       <HexViewWithForm />
       <hr></hr>
-      <sub><a  href="https://github.com/tintinweb">@tintinweb ❤️</a></sub>
+      <sub><a href="https://github.com/tintinweb">@tintinweb ❤️</a></sub>
     </div>
 
   )
