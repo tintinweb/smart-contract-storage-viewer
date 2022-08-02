@@ -1,0 +1,23 @@
+{
+  "name": "contract-storage-viewer",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "export": "next export",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "jquery": "^3.6.0",
+    "next": "10.2.3",
+    "react": "16.8.6",
+    "react-dom": "16.8.6",
+    "react-hex-editor": "^0.3.0"
+  },
+  "devDependencies": {
+    "eslint": "8.21.0",
+    "eslint-config-next": "12.2.3"
+  }
+}
