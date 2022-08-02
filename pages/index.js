@@ -62,14 +62,13 @@ class HexViewWithForm extends React.Component {
       //fetch data
       this.state.api.setEndpoint(this.state.endpoint);
       this.state.api.getStorageAt(this.state.target, this.state.startslot, this.state.numslots, this.state.atBlock).then(arr => {
-        let flatData = arr.reduce((flat, toFlatten) => flat.concat(hexStringToByteArray(toFlatten.replace("0x", ""))), []);
+        let flatData = arr.map(a => a.result).reduce((flat, toFlatten) => flat.concat(hexStringToByteArray(toFlatten.replace("0x", ""))), []);
         this.setState({
           data: flatData,
           nonce: this.state.nonce + 1, //force render
           error: undefined
         });
       }).catch(err => {
-
         let errMsg = err.responseJSON.error.message;
         if (errMsg.substr("rate limited")) {
           errMsg += ". Check infura API-key."

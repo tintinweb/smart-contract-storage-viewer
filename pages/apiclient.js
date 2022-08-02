@@ -17,20 +17,33 @@ export default class EthRPC {
 
             $.ajax({
                 url: that.endpoint,
-
-                data: JSON.stringify({ jsonrpc: '2.0', method: method, params: params, id: that.id++ }),  // id is needed !!
-
+                data: JSON.stringify({ jsonrpc: '2.0', method: method, params: params, id: that.id++ }),
                 type: "POST",
-
                 dataType: "json",
-                success: function (data) { resolve(data.result); },
+                success: function (data) { resolve(data); },
                 error: function (err) { reject(err) }
             });
         });
     }
 
     callBatch(method, paramsBatch) {
-        return Promise.all(paramsBatch.map(p => this.call(method, p)));
+        const that = this;
+        if(that.endpoint.substr("infura.io")){
+            // supports batch mode
+            return new Promise(function (resolve, reject) {
+                $.ajax({
+                    url: that.endpoint,
+                    data: JSON.stringify(paramsBatch.map(p => {return { jsonrpc: '2.0', method: method, params: p, id: that.id++ }})), 
+                    type: "POST",
+                    dataType: "json",
+                    success: function (data) { resolve(data); },
+                    error: function (err) { reject(err) }
+                });
+            });
+        } else {
+            // fallback 
+            return Promise.all(paramsBatch.map(p => this.call(method, p)));
+        }
     }
 
     getStorageAt(target, start, num, atBlock) {
