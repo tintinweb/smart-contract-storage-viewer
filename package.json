@@ -1,6 +1,16 @@
 {
   "name": "contract-storage-viewer",
   "version": "0.1.0",
+  "description": "Smart Contract Storage Hex Viewer",
+  "license": "GPLv3",
+  "author": {
+    "name": "tintinweb",
+    "url": "https://github.com/tintinweb/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tintinweb/smart-contract-storage-viewer.git"
+  },
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -14,7 +24,8 @@
     "next": "10.2.3",
     "react": "16.8.6",
     "react-dom": "16.8.6",
-    "react-hex-editor": "^0.3.0"
+    "react-hex-editor": "^0.3.0",
+    "react-json-view": "^1.21.3"
   },
   "devDependencies": {
     "eslint": "8.21.0",

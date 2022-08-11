@@ -6,6 +6,10 @@ import EthRPC from '../lib/apiclient';
 
 import analyzeStorage from '../lib/decoder';
 
+import dynamic from 'next/dynamic'
+
+const DynamicReactJson = dynamic(import('react-json-view'), { ssr: false })
+
 class HexViewWithForm extends React.Component {
   constructor(props) {
     super(props);
@@ -81,8 +85,6 @@ class HexViewWithForm extends React.Component {
 
   render() {
 
-    console.log(analyzeStorage(this.state.data));
-
     function handleSetValue(offset, value) {
       //this.setState({data[offset] = value;
       //this.state.nonce += 1;
@@ -95,6 +97,8 @@ class HexViewWithForm extends React.Component {
     } else {
       chainPrefix = "";
     }
+
+    let storageAnalysis = analyzeStorage(this.state);
 
     return (
       <div>
@@ -191,6 +195,19 @@ class HexViewWithForm extends React.Component {
             theme={{}}
           />
         </div>
+        <div className="mt-2 flex">
+          <div className="flex items-center text-sm text-gray-500">
+            <DynamicReactJson
+              name={false}
+              collapsed={true}
+              src={
+                Object.keys(storageAnalysis).reduce((result, key) => {
+                  result[key] = storageAnalysis[key].guess;
+                  return result;
+                }, {})
+              } />
+          </div>
+        </div>
       </div>
     );
   }
@@ -209,7 +226,7 @@ export default function Home() {
       </Head>
       <HexViewWithForm />
       <hr></hr>
-      <sub><a href="https://github.com/tintinweb">@tintinweb ❤️</a></sub>
+      <sub><a href="https://github.com/tintinweb">@tintinweb ❤️</a> <a href="https://github.com/tintinweb/smart-contract-storage-viewer">smart-contract-storage-viewer</a></sub>
     </div>
 
   )
