@@ -63,11 +63,11 @@ class HexViewWithForm extends React.Component {
 
     if (this.state.dirty) {
       this.setState({ dirty: false });
-      let atblock = isNaN(parseInt(this.state.atBlock)) ? "latest": `0x${this.state.atBlock.toString(16)}`;
+      let atblock = isNaN(parseInt(this.state.atBlock)) ? "latest" : `0x${this.state.atBlock.toString(16)}`;
       //fetch data
       this.state.api.setEndpoint(this.state.endpoint);
       this.state.api.getStorageAt(this.state.target, this.state.startslot, this.state.numslots, atblock).then(arr => {
-        if(arr && arr.length>0 && arr[0].error){
+        if (arr && arr.length > 0 && arr[0].error) {
           throw new Error(arr[0].error.message);
         }
         let flatData = arr.map(a => a.result).reduce((flat, toFlatten) => flat.concat(hexStringToByteArray(toFlatten.replace("0x", ""))), []);
@@ -78,17 +78,17 @@ class HexViewWithForm extends React.Component {
         });
       }).catch(err => {
         let errMsg;
-        if(err instanceof TypeError){
+        if (err instanceof TypeError) {
           errMsg = "Invalid Input";
-        } else if(err.message){
-            errMsg = err.message;
+        } else if (err.message) {
+          errMsg = err.message;
         } else {
           errMsg = err.responseJSON.error.message;
           if (errMsg.substr("rate limited")) {
             errMsg += ". Check your infura API limitations or change API-key."
           }
         }
-        
+
 
         this.setState({ error: errMsg })
       });
@@ -211,13 +211,23 @@ class HexViewWithForm extends React.Component {
           <div className="flex items-center text-sm text-gray-500">
             <DynamicReactJson
               name={false}
-              collapsed={true}
+              collapsed={false}
               src={
                 Object.keys(storageAnalysis).reduce((result, key) => {
                   result[key] = storageAnalysis[key].guess;
                   return result;
                 }, {})
-              } />
+              }
+              onSelect={
+                (select)=>{
+                  switch(select.name){
+                    case 'address':
+                      window.open(`https://${chainPrefix && chainPrefix!='mainnet'?`${chainPrefix}.`:""}etherscan.io/address/${select.value}`,'_blank');
+                      break;
+                  }
+                }
+              }
+            />
           </div>
         </div>
       </div>
