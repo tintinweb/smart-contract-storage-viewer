@@ -119,7 +119,7 @@ class HexViewWithForm extends React.Component {
             <table>
               <thead>
                 <tr>
-                  <th>Target</th>
+                  <th>📝 Target</th>
                   <th>First Slot</th>
                   <th># Slots</th>
                   <th>at Block</th>
