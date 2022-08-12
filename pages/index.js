@@ -63,9 +63,13 @@ class HexViewWithForm extends React.Component {
 
     if (this.state.dirty) {
       this.setState({ dirty: false });
+      let atblock = isNaN(parseInt(this.state.atBlock)) ? "latest": `0x${this.state.atBlock.toString(16)}`;
       //fetch data
       this.state.api.setEndpoint(this.state.endpoint);
-      this.state.api.getStorageAt(this.state.target, this.state.startslot, this.state.numslots, this.state.atBlock).then(arr => {
+      this.state.api.getStorageAt(this.state.target, this.state.startslot, this.state.numslots, atblock).then(arr => {
+        if(arr && arr.length>0 && arr[0].error){
+          throw new Error(arr[0].error.message);
+        }
         let flatData = arr.map(a => a.result).reduce((flat, toFlatten) => flat.concat(hexStringToByteArray(toFlatten.replace("0x", ""))), []);
         this.setState({
           data: flatData,
@@ -73,10 +77,18 @@ class HexViewWithForm extends React.Component {
           error: undefined
         });
       }).catch(err => {
-        let errMsg = err.responseJSON.error.message;
-        if (errMsg.substr("rate limited")) {
-          errMsg += ". Check infura API-key."
+        let errMsg;
+        if(err instanceof TypeError){
+          errMsg = "Invalid Input";
+        } else if(err.message){
+            errMsg = err.message;
+        } else {
+          errMsg = err.responseJSON.error.message;
+          if (errMsg.substr("rate limited")) {
+            errMsg += ". Check your infura API limitations or change API-key."
+          }
         }
+        
 
         this.setState({ error: errMsg })
       });
