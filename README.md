@@ -2,6 +2,10 @@
 
 <a href=https://tintinweb.github.io/smart-contract-storage-viewer/>
 <img width="971" alt="image" src="https://user-images.githubusercontent.com/2865694/182379988-6ee51fee-a521-4fa1-b344-4a23ca2429f9.png">
+
+
+<img width="971" alt="image" src="https://user-images.githubusercontent.com/2865694/184351192-e9d1bdd2-b115-43cc-bbdd-9337b5dd6969.png">
+
 </a>
 
 
