@@ -82,6 +82,8 @@ class HexViewWithForm extends React.Component {
           errMsg = "Invalid Input";
         } else if (err.message) {
           errMsg = err.message;
+        } else if (err.readyState != undefined) {
+          errMsg = "Error querying API endpoint (infura?)"
         } else {
           errMsg = err.responseJSON.error.message;
           if (errMsg.substr("rate limited")) {
@@ -159,7 +161,7 @@ class HexViewWithForm extends React.Component {
                       pattern="https?://.*" title="Field must be a HTTP(s)-URL."
                       size={10}
                       value={this.state.atBlock}
-                      onChange={(e) => e.target.value.trim() && this.setState({ atBlock: e.target.value.trim(), dirty: true })}
+                      onChange={(e) => this.setState({ atBlock: e.target.value.trim(), dirty: true })}
                     />
                   </td>
                   <td>
@@ -170,7 +172,7 @@ class HexViewWithForm extends React.Component {
                         pattern="https?://.*" title="Field must be a HTTP(s)-URL."
                         size={70}
                         value={this.state.endpoint}
-                        onChange={(e) => e.target.value.trim() && this.setState({ endpoint: e.target.value.trim(), dirty: true })}
+                        onChange={(e) => this.setState({ endpoint: e.target.value.trim(), dirty: true })}
                       />
                       &nbsp;
                       <a href="https://infura.io/register">ⓘ</a>
@@ -212,6 +214,7 @@ class HexViewWithForm extends React.Component {
             <DynamicReactJson
               name={false}
               collapsed={false}
+              displayDataTypes={false}
               src={
                 Object.keys(storageAnalysis).reduce((result, key) => {
                   result[key] = storageAnalysis[key].guess;
@@ -219,10 +222,10 @@ class HexViewWithForm extends React.Component {
                 }, {})
               }
               onSelect={
-                (select)=>{
-                  switch(select.name){
+                (select) => {
+                  switch (select.name) {
                     case 'address':
-                      window.open(`https://${chainPrefix && chainPrefix!='mainnet'?`${chainPrefix}.`:""}etherscan.io/address/${select.value}`,'_blank');
+                      window.open(`https://${chainPrefix && chainPrefix != 'mainnet' ? `${chainPrefix}.` : ""}etherscan.io/address/${select.value}`, '_blank');
                       break;
                   }
                 }
