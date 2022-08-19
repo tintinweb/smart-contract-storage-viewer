@@ -3,30 +3,53 @@ import styles from '../styles/Home.module.css'
 import HexEditor from 'react-hex-editor';
 import React from 'react';
 import EthRPC from '../lib/apiclient';
-
-import analyzeStorage from '../lib/decoder';
-
+import { analyzeStorage, hexStringToByteArray, toHexString } from '../lib/decoder';
 import dynamic from 'next/dynamic'
+import Web3 from 'web3';
 
 const DynamicReactJson = dynamic(import('react-json-view'), { ssr: false })
+
 
 class HexViewWithForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       endpoint: "https://ropsten.infura.io/v3/798abb58ef824315ae09ce39beb1c329",
+      etherscanApiKey: undefined,
       startslot: "0x0",
       numslots: 10,
       target: "0x3a6CAE3af284C82934174F693151842Bc71b02b2",
       atBlock: "latest",
       data: new Array(),
+      txList: [],
       nonce: 0,
       dirty: true,
       error: undefined,
-      api: new EthRPC()
+      errorEtherscan: undefined,
+      api: new EthRPC(),
+      web3: new Web3()
     };
+
+    this._setEndpointChanged();
+
+
+    console.log(this.state.web3.eth.abi.encodeFunctionSignature("hi(uint,uint)"));
   }
 
+  _getNetwork() {
+    let chainPrefix = this.state.endpoint.match(/https?:\/\/(.*).infura.io.*/);
+    if (chainPrefix && chainPrefix.length >= 2) {
+      return chainPrefix[1].toLowerCase().trim();
+    }
+    return;
+  }
+
+  _setEndpointChanged() {
+    this.setState({
+      web3: new Web3(new Web3.providers.HttpProvider(this.state.endpoint)),
+    });
+    this.state.api.setEndpoint(this.state.endpoint, this.state.etherscanApiKey);
+  }
 
   shouldComponentUpdate() {
     return true;
@@ -48,29 +71,17 @@ class HexViewWithForm extends React.Component {
     }
     console.log("updated")
 
-
-    function hexStringToByteArray(hexString) {
-      if (hexString.length % 2 !== 0) {
-        return [];
-      }/* w w w.  jav  a2 s .  c o  m*/
-      var numBytes = hexString.length / 2;
-      var byteArray = new Array(numBytes);
-      for (var i = 0; i < numBytes; i++) {
-        byteArray[i] = parseInt(hexString.substr(i * 2, 2), 16);
-      }
-      return byteArray;
-    }
-
     if (this.state.dirty) {
       this.setState({ dirty: false });
       let atblock = isNaN(parseInt(this.state.atBlock)) ? "latest" : `0x${this.state.atBlock.toString(16)}`;
       //fetch data
-      this.state.api.setEndpoint(this.state.endpoint);
+      this._setEndpointChanged();
+      /** hex-view */
       this.state.api.getStorageAt(this.state.target, this.state.startslot, this.state.numslots, atblock).then(arr => {
         if (arr && arr.length > 0 && arr[0].error) {
           throw new Error(arr[0].error.message);
         }
-        let flatData = arr.map(a => a.result).reduce((flat, toFlatten) => flat.concat(hexStringToByteArray(toFlatten.replace("0x", ""))), []);
+        let flatData = arr.map(a => a.result).reduce((flat, toFlatten) => flat.concat(hexStringToByteArray(toFlatten)), []);
         this.setState({
           data: flatData,
           nonce: this.state.nonce + 1, //force render
@@ -93,6 +104,72 @@ class HexViewWithForm extends React.Component {
 
 
         this.setState({ error: errMsg })
+      });
+      /** tx-view */
+      this.state.api.etherscanTxList(this.state.target, this._getNetwork(), "txlist").then(resp => {
+
+        function parseMethod(s) {
+
+          let funcParts = s.split("(");
+
+          let funcDeclDef = {
+            name: funcParts[0],
+            args: []
+          }
+          funcDeclDef.args = funcParts[1].split(")", 1)[0].split(",").map(a => {
+            let parts = a.trim().split(" ")
+            return { type: parts.slice(0, -1).join(" "), name: parts[parts.length - 1] }
+          })
+
+          return funcDeclDef;
+        }
+
+        const that = this;
+        function decodeFunction(input, method) {
+          let decoded = undefined;
+          try {
+            decoded = that.state.web3.eth.abi.decodeParameters(method.args.map(a => a.type), toHexString(input));
+          } catch (e) {
+            decoded = e;
+          }
+          let args = [];
+          for (let argid in method.args) {
+            args.push(`(${method.args[argid].type} '${method.args[argid].name}') ${decoded[argid]}`);
+            //args.push([method.args[argid].type, method.args[argid].name], decoded[argid])
+          }
+
+
+          return [method.name, args];
+
+          return `${method.name}(${args.join(", ")})`;
+        }
+
+        let results = resp.result.map(tx => {
+          let funcDecl = tx.functionName;
+          let inputBytes = hexStringToByteArray(tx.input)
+          let methodId = inputBytes.slice(0, 4);
+          let data = inputBytes.slice(4)
+          if (!funcDecl) {
+            //4bytes
+            return
+          }
+          //parse funcdecl
+          let method = parseMethod(funcDecl);
+          //console.log(tx)
+          let decoded = decodeFunction(data, method);
+          let ret = {}
+          ret[`function ${decoded[0]}(...)`] = decoded[1];
+          ret.ts = tx.timeStamp
+          ret.hash = tx.hash
+          return ret;
+          return { ts: tx.timeStamp, hash: tx.hash, };
+          //map
+
+        })
+        this.setState({ txList: results })
+
+      }).catch(e => {
+        this.setState({ errorEtherscan: e })
       });
     }
   }
@@ -188,11 +265,12 @@ class HexViewWithForm extends React.Component {
         </div>
         <div>
           <div>
-            <a href={`https://${chainPrefix != 'mainnet' ? `${chainPrefix}.` : ''}etherscan.io/address/${this.state.target}`}>🌐 Etherscan</a>
+            <a href={`https://${chainPrefix != 'mainnet' ? `${chainPrefix}.` : ''}etherscan.io/address/${this.state.target}`} target="_blank" rel='noreferrer'>🌐 Etherscan</a>
             {/*   &nbsp;<a href={`https://dashboard.tenderly.co/contract/${chainPrefix}/${this.state.target}`}>🟣 Tenderly</a> */}
           </div>
           <div className='errorBox'>
-            {this.state.error ? `❗ ${this.state.error}` : ""}
+            {this.state.error ? `❗ StorageDecoder: ${this.state.error}` : ""}
+            {this.state.errorEtherscan ? `❗ TxDecoder: Etherscan Rate Limit :/ please provide an API-Key below` : ""}
           </div>
           <HexEditor
             className="hexview"
@@ -209,6 +287,7 @@ class HexViewWithForm extends React.Component {
             theme={{}}
           />
         </div>
+        <span>Datatype Guesser:</span>
         <div className="mt-2 flex">
           <div className="flex items-center text-sm text-gray-500">
             <DynamicReactJson
@@ -220,6 +299,40 @@ class HexViewWithForm extends React.Component {
                   result[key] = storageAnalysis[key].guess;
                   return result;
                 }, {})
+              }
+              onSelect={
+                (select) => {
+                  switch (select.name) {
+                    case 'address':
+                      window.open(`https://${chainPrefix && chainPrefix != 'mainnet' ? `${chainPrefix}.` : ""}etherscan.io/address/${select.value}`, '_blank');
+                      break;
+                  }
+                }
+              }
+            />
+          </div>
+        </div>
+        <hr></hr>
+        <span>Transaction Decoder (requires etherscan apikey)</span>
+        <div title="Get Api Key">
+          <input
+            type="text"
+            name="etherscanApiKey"
+            title="Etherscan.io API-Key"
+            placeholder='Your Etherscan API-Key'
+            size={70}
+            value={this.state.etherscanApiKey || ""}
+            onChange={(e) => this.setState({ etherscanApiKey: e.target.value.trim(), dirty: true })}
+          />
+        </div>
+        <div className="mt-2 flex">
+          <div className="flex items-center text-sm text-gray-500">
+            <DynamicReactJson
+              name={false}
+              collapsed={false}
+              displayDataTypes={false}
+              src={
+                this.state.txList
               }
               onSelect={
                 (select) => {

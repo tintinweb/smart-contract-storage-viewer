@@ -25,7 +25,8 @@
     "react": "16.8.6",
     "react-dom": "16.8.6",
     "react-hex-editor": "^0.3.0",
-    "react-json-view": "^1.21.3"
+    "react-json-view": "^1.21.3",
+    "web3": "^1.7.5"
   },
   "devDependencies": {
     "eslint": "8.21.0",
