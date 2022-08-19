@@ -26,6 +26,7 @@
     "react-dom": "16.8.6",
     "react-hex-editor": "^0.3.0",
     "react-json-view": "^1.21.3",
+    "react-tabs": "^4.2.1",
     "web3": "^1.7.5"
   },
   "devDependencies": {
