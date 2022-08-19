@@ -65,6 +65,11 @@ class HexViewWithForm extends React.Component {
   }
 
   componentDidMount() {
+    window.tools = {
+      Web3: Web3,
+      web3: this.state.web3,
+      customRpcClient: this.state.api
+    }
     this.componentDidUpdate();
   }
 
@@ -286,7 +291,8 @@ class HexViewWithForm extends React.Component {
         >
           <TabList>
             <Tab>💾  Storage</Tab>
-            <Tab>↹  Transaction Decoder</Tab>
+            <Tab>↹   Transaction Decoder</Tab>
+            <Tab>🧰  Tools</Tab>
             <Tab>📍  About</Tab>
           </TabList>
 
@@ -390,7 +396,15 @@ class HexViewWithForm extends React.Component {
           </TabPanel>
           <TabPanel>
             <div>
-              ⇈ <sub><a href="https://github.com/tintinweb/smart-contract-storage-viewer">Fork Me!</a></sub>
+              <span> 🤫 open your browsers devtools (right-click → inspect) and type <code> `window.tools ↵`</code>.</span>
+              <br></br><br></br><br></br>
+              <code> ↦   window.tools.web3.utils.keccak256('hi')</code> <a href='https://web3js.readthedocs.io/en/v1.7.5/' target="_blank" rel='noreferrer'>[web3js]</a><a href='https://web3js.readthedocs.io/en/v1.7.5/web3-utils.html' target="_blank" rel='noreferrer'>[web3js-utils]</a>
+              <br></br><br></br><br></br>
+            </div>
+          </TabPanel>
+          <TabPanel>
+            <div>
+              ⇈ <sub><a href="https://github.com/tintinweb/smart-contract-storage-viewer">Fork Me @ tintinweb/smart-contract-storage-viewer</a></sub>
             </div>
           </TabPanel>
         </Tabs>
