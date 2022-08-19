@@ -36,9 +36,6 @@ class HexViewWithForm extends React.Component {
     };
 
     this._setEndpointChanged();
-
-
-    console.log(this.state.web3.eth.abi.encodeFunctionSignature("hi(uint,uint)"));
   }
 
   _getNetwork() {
@@ -87,7 +84,6 @@ class HexViewWithForm extends React.Component {
       //fetch data
       this._setEndpointChanged();
 
-      console.log(this.state.selectedTab);
 
       switch (this.state.selectedTab) {
         case 1:
@@ -372,7 +368,6 @@ class HexViewWithForm extends React.Component {
                   }
                   onSelect={
                     (select) => {
-                      console.log(select)
                       switch (select.name) {
                         case 'hash':
                           window.open(`https://${chainPrefix && chainPrefix != 'mainnet' ? `${chainPrefix}.` : ""}etherscan.io/tx/${select.value}`, '_blank');
