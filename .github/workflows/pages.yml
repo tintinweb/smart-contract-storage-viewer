@@ -76,6 +76,8 @@ jobs:
       - name: Install dependencies npm
         run: npm install
       - name: Build with Next.js
+        env:
+          NODE_OPTIONS: "--max_old_space_size=4096"
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
       - name: Static HTML export with Next.js
         run: ${{ steps.detect-package-manager.outputs.runner }} next export
