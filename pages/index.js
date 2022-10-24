@@ -18,11 +18,11 @@ class HexViewWithForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      endpoint: "https://ropsten.infura.io/v3/8f4869f74e4e4e2eb60d0c10b3eafc37",
+      endpoint: "https://mainnet.infura.io/v3/8f4869f74e4e4e2eb60d0c10b3eafc37",
       etherscanApiKey: undefined,
       startslot: "0x0",
       numslots: 10,
-      target: "0x3a6CAE3af284C82934174F693151842Bc71b02b2",
+      target: "0x5e4e65926ba27467555eb562121fac00d24e9dd2",
       atBlock: "latest",
       data: new Array(),
       selectedTab: 0,
