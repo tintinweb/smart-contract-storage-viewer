@@ -18,7 +18,7 @@ class HexViewWithForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      endpoint: "https://ropsten.infura.io/v3/798abb58ef824315ae09ce39beb1c329",
+      endpoint: "https://ropsten.infura.io/v3/8f4869f74e4e4e2eb60d0c10b3eafc37",
       etherscanApiKey: undefined,
       startslot: "0x0",
       numslots: 10,
