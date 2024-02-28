@@ -65,13 +65,16 @@ class HexViewWithForm extends React.Component {
     window.tools = {
       Web3: Web3,
       web3: this.state.web3,
-      customRpcClient: this.state.api
+      customRpcClient: this.state.api,
     }
+    try {
+      this.state.target = window.location.search.match(/(\b0x[a-fA-F0-9]{40}\b)/g).pop()
+    } catch (e) {}
+    
     this.componentDidUpdate();
   }
 
   componentDidUpdate() {
-
     if (!this.shouldUpdateView()) {
       console.log("no update")
       return;

@@ -1,6 +1,6 @@
 {
   "name": "contract-storage-viewer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Smart Contract Storage Hex Viewer",
   "license": "GPLv3",
   "author": {
